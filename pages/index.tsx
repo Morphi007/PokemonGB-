@@ -11,7 +11,7 @@ interface Props {
 const HomePage: NextPage<Props> = ({ pokemons }) => {
 	return (
 		<Layout title={'PokeDEX'}>
-			<h1>Pokemones HD</h1>
+			<h1>Pokédex</h1>
 			<Grid.Container gap={2} justify="flex-start">
 				{pokemons.map((pokemon) => (
 					<PokemonCard key={pokemon.id} pokemons={pokemon} />
