@@ -7,6 +7,7 @@ import { pokeApi } from '../../api';
 import { getPokemonInfo, localFavorites } from '../../utils';
 import confetti from 'canvas-confetti';
 import { Pokemon, PokemonListResponse } from '../../interfaces';
+import { redirect } from 'next/dist/server/api-utils';
 
 type Props = {
 	pokemon: Pokemon;
@@ -52,13 +53,13 @@ const PokemonByNamePage: NextPage<Props> = ({ pokemon }) => {
 				</Grid>
 				<Grid xs={12} sm={8}>
 					<Card>
-						<Card.Header css={{ display: 'flex', justifyContent: 'space-between' }}>
+						<Card.Header css={{ display: 'flex', justifyContent: 'space-between'}}>
 							<Text h1 transform="capitalize">
 								{pokemon.name}
-							</Text>
-							<Button ghost={!isInfavorites} color="gradient" onPress={onToggleFavorito}>
+							<Button  ghost={!isInfavorites} color="gradient" onPress={onToggleFavorito} css={{marginTop:"15px"}}>
 								Guardar en favoritos
 							</Button>
+							</Text>
 						</Card.Header>
 						<Card.Body>
 							<Text size={30}>Sprite:</Text>
@@ -101,7 +102,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 	return {
 		paths: pokemonNames.map((name) => ({ params: { name } })),
-		fallback: false,
+		//fallback: false,
+		fallback: 'blocking',
 	};
 };
 
@@ -109,10 +111,22 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({ params }) => {
 	const { name } = params as { name: string };
 
+	const pokemon = await getPokemonInfo(name);
+
+	if (!pokemon) {
+		return {
+			redirect: {
+				destination: '/',
+				permanent: false,
+			},
+		};
+	}
+
 	return {
 		props: {
-			pokemon: await getPokemonInfo(name),
+			pokemon,
 		},
+		revalidate: 86400,
 	};
 };
 
